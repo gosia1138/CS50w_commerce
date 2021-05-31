@@ -14,12 +14,18 @@
         <input type='number' id='bid' name='bid' min='{{ your_bid }}' value='{{ your_bid }}' step="0.01">
         <input type="submit" value="Bid">
     </form>
-    {% if message %}
-        <div>{{ message }}</div>
-    {% endif %}
+        {% if message %}
+            <div>{{ message }}</div>
+        {% endif %}
+    <form method="post">{% csrf_token %}
+        <input type="submit" name="watchlist" value="Add to your Watchlist.">
+    </form>
+
 {% else %}
-    <small><a href="{% url 'login' %}">Log in</a> to place your bid.</small>
+    <small><a href="{% url 'login' %}">Log in</a> to place your bid or add to watchlist</small>
 {% endif %}
+
+<small>{{ listing.watchers.all|length }} users is watching this listing</small>
 
 <hr>
 <p>Bids:</p>

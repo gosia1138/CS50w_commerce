@@ -1,0 +1,20 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    <form method="post">{% csrf_token %}
+        <fieldset>
+            <legend>Your watchlist:</legend>
+        {% for listing in user.watchlist.all %}
+            <p>
+                <input type="checkbox" id="{{ listing.pk }}" name="{{ listing.pk }}">
+                <label for="{{ listing.pk }}"><a href="{% url 'listing' listing.pk %}">{{ listing.title }}</a></label>
+            </p>
+        {% endfor %}
+        </fieldset>
+        <br>
+        <input type="submit" value="Stop watching selected listings">
+    </form>
+
+
+{% endblock %}

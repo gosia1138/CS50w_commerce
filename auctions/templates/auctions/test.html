@@ -1,0 +1,11 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+
+    {% for element in data %}
+        <p>{{ element }}</p>
+    {% endfor %}
+
+{{ data }}
+
+{% endblock %}

@@ -81,25 +81,32 @@ def create_view(request):
         return render(request, 'auctions/new.html')
 
 def detail_view(request, pk):
+    user = request.user
     listing = Listing.objects.get(pk=pk)
     bids = Listing.bids(listing)
     highest_bid = Listing.highest_bid(listing)
-    your_bid = float(Listing.highest_bid(listing).bid) + 0.01
+    if bids:
+        your_bid = float(Listing.highest_bid(listing).bid) + 0.01
+    else:
+        your_bid = float(listing.starting_bid) + 0.01
     if request.method == 'POST':
-        bid = request.POST['bid']
-        user = request.user
-        listing = Listing.objects.get(pk=pk)
-        if float(bid) < float(highest_bid.bid):
-            return render(request, 'auctions/listing.html', {
-                'pk': pk,
-                'listing':listing,
-                'bids': bids,
-                'highest_bid': highest_bid,
-                'your_bid': your_bid,
-                'message': 'Your bid must be higher than current highest bid!'
-            })
-        b = Bid(listing=listing, bid=bid, user=user)
-        b.save()
+        if 'watchlist' in request.POST:
+            user.watchlist.add(listing)
+        else:
+            bid = request.POST['bid']
+            user = request.user
+            listing = Listing.objects.get(pk=pk)
+            if float(bid) < float(highest_bid.bid):
+                return render(request, 'auctions/listing.html', {
+                    'pk': pk,
+                    'listing':listing,
+                    'bids': bids,
+                    'highest_bid': highest_bid,
+                    'your_bid': your_bid,
+                    'message': 'Your bid must be higher than current highest bid!'
+                })
+            b = Bid(listing=listing, bid=bid, user=user)
+            b.save()
         return HttpResponseRedirect(reverse('listing', args=[pk]))
     else:
         return render(request, 'auctions/listing.html', {
@@ -108,3 +115,23 @@ def detail_view(request, pk):
                 'highest_bid': highest_bid,
                 'your_bid': your_bid
             })
+
+
+def watchlist_view(request):
+    user = request.user
+
+    if request.method == 'POST':
+        for k, v in request.POST.items():
+            if v == 'on':
+                listing = Listing.objects.get(pk=k)
+                user.watchlist.remove(listing)
+        return HttpResponseRedirect(reverse('watchlist'))
+        # context = {
+        #     'data': request.POST,
+        #     }
+        # return render(request, 'auctions/test.html', context)
+    else:
+        context = {
+            'user': request.user,
+        }
+        return render(request, 'auctions/watchlist.html', context)
