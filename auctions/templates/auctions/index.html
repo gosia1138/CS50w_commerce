@@ -5,7 +5,7 @@
 
     <ul>
         {% for listing in listings %}
-            <li>{{ listing }}</li>
+            <li><a href="{% url 'listing' listing.pk %}">{{ listing }}</a></li>
         {% endfor %}
     </ul>
 

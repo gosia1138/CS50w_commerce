@@ -1,0 +1,32 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+
+<h1>{{ listing.title }}</h1>
+<small>posted by: {{ listing.user.username }}</small>
+<hr>
+<p>{{ listing.description }}</p>
+<p>Starting bid: {{ listing.starting_bid }} €</p>
+<p>Current highest bid: {{ highest_bid.bid }} €</p>
+{% if user.is_authenticated %}
+    <form method="post">{% csrf_token %}
+        <label for='bid'>Bid now:</label>
+        <input type='number' id='bid' name='bid' min='{{ your_bid }}' value='{{ your_bid }}' step="0.01">
+        <input type="submit" value="Bid">
+    </form>
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+{% else %}
+    <small><a href="{% url 'login' %}">Log in</a> to place your bid.</small>
+{% endif %}
+
+<hr>
+<p>Bids:</p>
+<ul>
+    {% for bid in bids %}
+        <li>{{ bid.user.username }} - {{ bid.bid }} €</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

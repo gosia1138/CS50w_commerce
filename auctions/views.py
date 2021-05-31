@@ -1,10 +1,11 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Listing
+from .models import User, Listing, Bid
 
 
 def index(request):
@@ -65,7 +66,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
-
+@login_required
 def create_view(request):
     if request.method == 'POST':
         title = request.POST['title']
@@ -78,3 +79,32 @@ def create_view(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, 'auctions/new.html')
+
+def detail_view(request, pk):
+    listing = Listing.objects.get(pk=pk)
+    bids = Listing.bids(listing)
+    highest_bid = Listing.highest_bid(listing)
+    your_bid = float(Listing.highest_bid(listing).bid) + 0.01
+    if request.method == 'POST':
+        bid = request.POST['bid']
+        user = request.user
+        listing = Listing.objects.get(pk=pk)
+        if float(bid) < float(highest_bid.bid):
+            return render(request, 'auctions/listing.html', {
+                'pk': pk,
+                'listing':listing,
+                'bids': bids,
+                'highest_bid': highest_bid,
+                'your_bid': your_bid,
+                'message': 'Your bid must be higher than current highest bid!'
+            })
+        b = Bid(listing=listing, bid=bid, user=user)
+        b.save()
+        return HttpResponseRedirect(reverse('listing', args=[pk]))
+    else:
+        return render(request, 'auctions/listing.html', {
+                'listing':listing,
+                'bids': bids,
+                'highest_bid': highest_bid,
+                'your_bid': your_bid
+            })
