@@ -1,19 +1,36 @@
 {% extends "auctions/layout.html" %}
+{% load static %}
 
 {% block body %}
 
     <form method="post">{% csrf_token %}
         <fieldset>
             <legend>Your watchlist:</legend>
-        {% for listing in user.watchlist.all %}
-            <p>
-                <input type="checkbox" id="{{ listing.pk }}" name="{{ listing.pk }}">
-                <label for="{{ listing.pk }}"><a href="{% url 'listing' listing.pk %}">{{ listing.title }}</a></label>
-            </p>
+        {% for listing in request.user.watchlist.all %}
+            <p><div class="row p-3 border bg-light">
+                <div class="col-1">
+                    <input type="checkbox" id="{{ listing.pk }}" name="{{ listing.pk }}">
+                </div>
+                <div class="col-2">
+                    {% if not listing.image %}
+                        <img class='img-fluid' src="{% static 'auctions/default.jpg' %}" alt="{{ listing.title }}">
+                    {% else %}
+                        <img class='img-fluid' src="{{ listing.image }}" alt="{{ listing.title }}">
+                    {% endif %}
+                </div>
+                <div class="col">
+                    <a href="{% url 'listing' pk=listing.id %}">
+                    <h3>{{ listing.title }}</h3></a>
+                    <p>{{ listing.description|truncatewords:20 }}</p>
+                </div>
+                <div class="col-2">
+                    <h2> {{ listing.bids.first.bid|default:listing.starting_bid }} €</h2>
+                </div>
+            </div></p>
         {% endfor %}
         </fieldset>
         <br>
-        <input type="submit" value="Stop watching selected listings">
+        <input type="submit" class="btn btn-primary" value="Stop watching selected listings">
     </form>
 
 

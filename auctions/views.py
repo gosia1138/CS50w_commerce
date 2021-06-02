@@ -5,7 +5,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Listing, Bid
+from .forms import ListingForm, CommentForm
+from .models import User, Listing, Bid, Comment
 
 
 def index(request):
@@ -69,69 +70,76 @@ def register(request):
 @login_required
 def create_view(request):
     if request.method == 'POST':
-        title = request.POST['title']
-        description = request.POST['description']
-        starting_bid = request.POST['starting_bid']
-        user = request.user
-
-        l = Listing(title=title, description=description, starting_bid=starting_bid, user=user)
-        l.save()
-        return HttpResponseRedirect(reverse("index"))
+        form = ListingForm(request.POST)
+        if form.is_valid():
+            l = Listing(
+                title = form.cleaned_data['title'],
+                category = form.cleaned_data['category'],
+                image = form.cleaned_data['image'],
+                description = form.cleaned_data['description'],
+                starting_bid = form.cleaned_data['starting_bid'],
+                user = request.user,
+            )
+            l.save()
+            return HttpResponseRedirect(reverse('listing', args=[l.pk]))
     else:
-        return render(request, 'auctions/new.html')
+        form = ListingForm()
+        return render(request, 'auctions/new.html', {'form':form})
 
 def detail_view(request, pk):
-    user = request.user
     listing = Listing.objects.get(pk=pk)
-    bids = Listing.bids(listing)
-    highest_bid = Listing.highest_bid(listing)
-    if bids:
-        your_bid = float(Listing.highest_bid(listing).bid) + 0.01
-    else:
-        your_bid = float(listing.starting_bid) + 0.01
     if request.method == 'POST':
+        # DEBUGGING LINE:
+        # keyword_test = 'watchlist' in request.POST
+        # context = {
+        #     'data': request.POST,
+        #     'keyword_test': keyword_test,
+        # }
+        # return render(request, 'auctions/debug.html', context)
+
+        if 'close' in request.POST:
+            listing.closed = True
+            listing.save()
+            return HttpResponseRedirect(reverse('listing', args=[pk]))
+        # adding to watchlist
         if 'watchlist' in request.POST:
-            user.watchlist.add(listing)
+            request.user.watchlist.add(listing)
+        # comments section
+        if 'comment_content' in request.POST:
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                c = Comment(
+                    user = request.user,
+                    listing = listing,
+                    comment_content = comment_form.cleaned_data['comment_content']
+                )
+                c.save()
+                return HttpResponseRedirect(reverse('listing', args=[pk]))
+        # bidding
         else:
-            bid = request.POST['bid']
-            user = request.user
-            listing = Listing.objects.get(pk=pk)
-            if float(bid) < float(highest_bid.bid):
-                return render(request, 'auctions/listing.html', {
-                    'pk': pk,
-                    'listing':listing,
-                    'bids': bids,
-                    'highest_bid': highest_bid,
-                    'your_bid': your_bid,
-                    'message': 'Your bid must be higher than current highest bid!'
-                })
-            b = Bid(listing=listing, bid=bid, user=user)
-            b.save()
+            bid = float(request.POST.get('bid', 0))
+            if bid >= listing.next_bid():
+                b = Bid(user=request.user, listing=listing, bid=bid)
+                b.save()
         return HttpResponseRedirect(reverse('listing', args=[pk]))
     else:
         return render(request, 'auctions/listing.html', {
                 'listing':listing,
-                'bids': bids,
-                'highest_bid': highest_bid,
-                'your_bid': your_bid
+                'watchers': len(listing.watchers.all()),
+                'bids': Listing.bids(listing),
+                'next_bid': Listing.next_bid(listing),
+                'highest_bid': listing.bids().first(),
+                'comments': listing.comments(),
+                'comment_form': CommentForm()
             })
 
 
 def watchlist_view(request):
-    user = request.user
-
     if request.method == 'POST':
         for k, v in request.POST.items():
             if v == 'on':
                 listing = Listing.objects.get(pk=k)
-                user.watchlist.remove(listing)
+                request.user.watchlist.remove(listing)
         return HttpResponseRedirect(reverse('watchlist'))
-        # context = {
-        #     'data': request.POST,
-        #     }
-        # return render(request, 'auctions/test.html', context)
     else:
-        context = {
-            'user': request.user,
-        }
-        return render(request, 'auctions/watchlist.html', context)
+        return render(request, 'auctions/watchlist.html')

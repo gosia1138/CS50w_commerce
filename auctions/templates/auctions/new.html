@@ -1,4 +1,5 @@
 {% extends 'auctions/layout.html' %}
+{% load crispy_forms_tags %}
 
 {% block body %}
 
@@ -8,12 +9,7 @@
 {% endif %}
 
 <form method="post">{% csrf_token %}
-    <label for="title">Title:</label><br>
-    <input type='text' id='title' name='title'><br>
-    <label for="description">Description:</label><br>
-    <textarea id='description' name='description' cols=35 rows=10></textarea><br>
-    <label for="sb">Starting bid:</label><br>
-    <input type="number" id='sb' name="starting_bid"><br><br>
+    {{ form|crispy }}
     <input type="submit" value="Submit"><br>
 </form>
 

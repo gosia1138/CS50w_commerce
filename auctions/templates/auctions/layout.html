@@ -1,5 +1,6 @@
 {% load static %}
 
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -40,7 +41,16 @@
             {% endif %}
         </ul>
         <hr>
-        {% block body %}
-        {% endblock %}
+        {% if message %}
+        <div class="alert alert-primary" role="alert">
+            {{ message }}
+        </div>
+        {% endif %}
+
+        <div class="container px-4">
+            {% block body %}
+            {% endblock %}
+        </div>
+
     </body>
 </html>
