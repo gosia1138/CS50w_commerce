@@ -4,7 +4,12 @@
 
 {% block body %}
 
+<!-- AUCTION DETAILS  -->
+
 <div class="row">
+
+<!-- IMAGE, TITLE, BID OR CLOSE AUCTION -->
+
     <div class="col-sm-8 p-3">
         {% if not listing.image %}
             <img class='img-fluid' src="{% static 'auctions/default.jpg' %}" alt="{{ listing.title }}">
@@ -14,58 +19,102 @@
     </div>
     <div class="col-sm-4 p-3">
         <h3>{{ listing.title }}</h3>
-        {% if not listing.closed and listing.user == request.user %}
-            <form method="post">{% csrf_token %}
-                <input type="submit" name="close" value="Close Listing">
-            </form>
-        {% endif %}
         <small>posted by: {{ listing.user.username }}</small><br><br>
-        <small>Current price (started at {{ listing.starting_bid }} €):</small>
-        <h3>{{ highest_bid.bid|default:listing.starting_bid }} €</h3>
-        <small>{{ watchers }} user{{ watchers|pluralize }} watching this listing</small>
-        <hr>
+        <!-- CLOSED LISTING  -->
         {% if listing.closed %}
-
-            <p>Listing closed</p>
-            <p>winner: {{ highest_bid.user.username }}</p>
-
+            <small>Final price(started at {{ listing.starting_bid }} €):</small>
+            {% if highest_bid.bid %}
+                <h3>{{ highest_bid.bid }} € <span class="badge rounded-pill bg-secondary">Closed</span>
+                {% if request.user == highest_bid.user %}
+                    <p><div class="alert alert-success" role="alert">
+                        You won this auction!
+                    </div></p>
+                {% endif %}
+            {% else %}
+                <h4>Closed without offers</h4>
+            {% endif %}
         {% else %}
-
+        <!-- OPEN LISTING -->
+            <small>Current price (started at {{ listing.starting_bid }} €):</small>
+            <h3>{{ highest_bid.bid|default:listing.starting_bid }} €
+                {% if highest_bid.user == request.user %}
+                    <small><span class="badge rounded-pill bg-success">You are winning!</span></small>
+                {% elif request.user in bidders %}
+                    <small><span class="badge rounded-pill bg-warning">You were outbid!</span></small>
+                {% endif %}
+            </h3>
+            <small>{{ bidders_number }} user{{ bidders_number|pluralize }} bidding | </small>
+            <small>{{ watchers }} user{{ watchers|pluralize }} watching</small>
+            <hr>
+            <!-- AUTHENTICATED USER -->
             {% if user.is_authenticated %}
+                <!-- CLOSE AUCTION OR BID IF NOT YOUR OWN -->
+                {% if not listing.closed and listing.user == request.user %}
+                    <form method="post">{% csrf_token %}
+                        <input type="submit" name="close" value="Close Listing">
+                    </form>
+                {% else %}
+                    {% if bid_message %}
+                        <small style="color:red;">{{ bid_message }}</small>
+                    {% endif %}
+                    <p><form method="post">{% csrf_token %}
+                        <p><label for='bid'>Your offer:</label>
+                        <div class="input-group mb-3">
+                            <input type="number" id='bid' name='bid' value="{{ listing.next_bid }}" step=0.01
+                                class="form-control" placeholder="Recipient's username" aria-label="Recipient's username"
+                                aria-describedby="button-addon2"><span class="input-group-text" id="basic-addon1">€</span>
+                            <button class="btn btn-primary" type="submit" id="button-addon2">Bid</button>
+                        </div>
+                    </form></p>
+                    <!-- ADD/REMOVE FROM WATCHLIST -->
 
-                <form method="post">{% csrf_token %}
-                    <label for='bid'>Your offer:</label>
-                    <p><input type='number' id='bid' name='bid' value="{{ listing.next_bid }}" step=0.01> €</p>
-                    <div class="d-grid gap-2">
-                        <p><input class="btn btn-primary" type="submit" value="Bid"></p>
-                    </div>
-                </form>
-                <form method="post">{% csrf_token %}
-                    <input type="submit" name="watchlist" value="Add to your Watchlist.">
-                </form>
+                    <p><form method="post">{% csrf_token %}
+                        {% if listing in request.user.watchlist.all %}
+                            <div class="d-grid gap-2">
+                                <input class="btn btn-outline-primary" type="submit" name="watchlist_remove" value="Remove from Watchlist.">
+                            </div>
+                        {% else %}
+                            <div class="d-grid gap-2">
+                                <input class="btn btn-outline-primary" type="submit" name="watchlist_add" value="Add to Watchlist.">
+                            </div>
+                        {% endif %}
+                    </form></p>
 
+
+                {% endif %}
+            <!-- NON-AUTHENTICATED USER -->
             {% else %}
                 <small><a href="{% url 'login' %}">Log in</a> to place your bid or add to watchlist</small>
             {% endif %}
-
-            {% endif %}
+        {% endif %}
+        </div>
     </div>
-  </div>
-  <div class="row gap-3">
-    <div class="col-sm p-3">
-        <p>{{ listing.description }}</p>
+
+<!-- LISTING DESCRIPTION -->
+
+    <div class="row gap-3">
+        <div class="col-sm p-3">
+            <p>{{ listing.description }}</p>
+        </div>
     </div>
-  </div>
 
 
-<hr>
-<p>Bids:</p>
-<ul>
-    {% for bid in bids %}
-        <li>{{ bid.user.username }} - {{ bid.bid }} €</li>
-    {% endfor %}
-</ul>
-<hr>
+<!-- LIST OF BIDDERS FOR AUCTION OWNER ONLY -->
+
+{% if listing.user == request.user %}
+    <p>Bids:</p>
+    <ul>
+        {% for bid in bids %}
+            <li>{{ bid.user.username }} - {{ bid.bid }} €</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+
+
+<!-- ADD A COMMENT FORM -->
+
+
 {% if user.is_authenticated %}
     <form method="post">{% csrf_token %}
         {{ comment_form|crispy }}
@@ -76,21 +125,21 @@
     <p><a href="url 'login'">Log in</a> to add comments.</p>
 {% endif %}
 
+<!-- COMMENTS -->
+
 <hr>
 {% for comment in comments %}
-<div class="card">
-  <div class="card-header">
-    {{ comment.time|date:'d F Y' }}
-  </div>
-  <div class="card-body">
-    <blockquote class="blockquote mb-0">
-      <p>{{ comment.comment_content }}</p>
-      <footer class="blockquote-footer">{{ comment.user.username }}</footer>
-    </blockquote>
-  </div>
-</div><br>
+    <div class="card">
+      <div class="card-header">
+        {{ comment.time|date:'d F Y' }}
+      </div>
+      <div class="card-body">
+        <blockquote class="blockquote mb-0">
+          <p>{{ comment.comment_content }}</p>
+          <footer class="blockquote-footer">{{ comment.user.username }}</footer>
+        </blockquote>
+      </div>
+    </div><br>
 {% endfor %}
-
-
 
 {% endblock %}

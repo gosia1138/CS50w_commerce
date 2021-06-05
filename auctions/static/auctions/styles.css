@@ -1,3 +1,11 @@
 body {
-    padding: 10px;
+    padding: 0px !important;
+}
+
+.white_bgr {
+    background-color: #fff;
+}
+
+.gray_bgr {
+    background-color: #eee;
 }

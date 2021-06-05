@@ -10,8 +10,9 @@ from .models import User, Listing, Bid, Comment
 
 
 def index(request):
+    # List all active listings
     context = {
-        'listings': Listing.objects.all(),
+        'listings': Listing.objects.all().order_by('-time'),
     }
     return render(request, "auctions/index.html", context)
 
@@ -67,6 +68,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+
 @login_required
 def create_view(request):
     if request.method == 'POST':
@@ -90,10 +92,14 @@ def detail_view(request, pk):
     listing = Listing.objects.get(pk=pk)
     if request.method == 'POST':
         # DEBUGGING LINE:
-        # keyword_test = 'watchlist' in request.POST
+        # bidders = set()
+        # for bid in Listing.bids(listing):
+        #     bidders.add(bid.user)
+        # number = len(bidders)
         # context = {
+        #     'bidders': bidders,
+        #     'number': number,
         #     'data': request.POST,
-        #     'keyword_test': keyword_test,
         # }
         # return render(request, 'auctions/debug.html', context)
 
@@ -102,8 +108,12 @@ def detail_view(request, pk):
             listing.save()
             return HttpResponseRedirect(reverse('listing', args=[pk]))
         # adding to watchlist
-        if 'watchlist' in request.POST:
+        if 'watchlist_add' in request.POST:
             request.user.watchlist.add(listing)
+            return HttpResponseRedirect(reverse('listing', args=[pk]))
+        if 'watchlist_remove' in request.POST:
+            request.user.watchlist.remove(listing)
+            return HttpResponseRedirect(reverse('listing', args=[pk]))
         # comments section
         if 'comment_content' in request.POST:
             comment_form = CommentForm(request.POST)
@@ -121,11 +131,27 @@ def detail_view(request, pk):
             if bid >= listing.next_bid():
                 b = Bid(user=request.user, listing=listing, bid=bid)
                 b.save()
+            else:
+                return render(request, 'auctions/listing.html', {
+                        'listing':listing,
+                        'watchers': len(listing.watchers.all()),
+                        'bidders': set(bid.user for bid in Listing.bids(listing)),
+                        'bids': Listing.bids(listing),
+                        'next_bid': Listing.next_bid(listing),
+                        'highest_bid': listing.bids().first(),
+                        'comments': listing.comments(),
+                        'comment_form': CommentForm(),
+                        'bid_message': 'Miminum bid is {} €'.format(Listing.next_bid(listing))
+                    })
+
         return HttpResponseRedirect(reverse('listing', args=[pk]))
     else:
+        # Displaying the site (GET REQUEST)
         return render(request, 'auctions/listing.html', {
                 'listing':listing,
                 'watchers': len(listing.watchers.all()),
+                'bidders': set(bid.user for bid in Listing.bids(listing)),
+                'bidders_number': len(set(bid.user for bid in Listing.bids(listing))),
                 'bids': Listing.bids(listing),
                 'next_bid': Listing.next_bid(listing),
                 'highest_bid': listing.bids().first(),
@@ -143,3 +169,20 @@ def watchlist_view(request):
         return HttpResponseRedirect(reverse('watchlist'))
     else:
         return render(request, 'auctions/watchlist.html')
+
+
+def users_bids_view(request):
+    bids = request.user.bids()
+    bids_l = set(bid.listing for bid in bids)
+    context = {
+        'bids': bids_l
+    }
+    return render(request, 'auctions/users_bids.html', context)
+
+
+def users_listings_view(request):
+    listings = request.user.listings()
+    context = {
+        'listings': listings
+    }
+    return render(request, 'auctions/users_listings.html', context)

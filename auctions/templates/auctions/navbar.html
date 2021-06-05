@@ -1,0 +1,47 @@
+{% load static %}
+
+<nav class="navbar navbar-light">
+    <a href="{% url 'index' %}" class="navbar-brand"><h3>Auctions</h3></a>
+    <form class="form-inline w-50 form-control-sm" action="#" method="get">
+        <div class="input-group align-self-center">
+            <input class="form-control form-control-sm w-50" type="search" placeholder="Search" aria-label="Search">
+            <select class="form-select form-select-sm" aria-label=".form-select-sm example">
+                <option selected>Category</option>
+                <option value="1">One</option>
+                <option value="2">Two</option>
+                <option value="3">Three</option>
+            </select>
+            <button class="btn btn-outline-secondary my-2 my-sm-0" type="submit">Search</button>
+        </div>
+  </form>
+  <div class="">
+      {% if user.is_authenticated %}
+
+
+          <div class="btn-group p-0">
+              <a role="button" class="btn btn-outline-secondary" href="{% url 'watchlist' %}">
+                  Welcome, <strong>{{ user.username }}!</strong></a>
+              <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                  <span class="visually-hidden">Toggle Dropdown</span>
+              </button>
+              <ul class="dropdown-menu">
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'watchlist' %}">Dashboard</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                  </li>
+              </ul>
+          </div>
+      {% else %}
+          <ul class="nav">
+              <li class="nav-item">
+                  <a class="nav-link" href="{% url 'login' %}">Log In</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="{% url 'register' %}">Register</a>
+              </li>
+          </ul>
+      {% endif %}
+  </div>
+</nav>

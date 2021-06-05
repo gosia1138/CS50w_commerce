@@ -1,0 +1,60 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+    <!-- DASHBOARD MENU -->
+
+    <h3>Dashboard</h3>
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'users_bids' %}">Bids</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'new_listing' %}">New Listing</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="{% url 'users_listings' %}">Your Listings</a>
+        </li>
+    </ul>
+    <br>
+
+    <!-- CONTENT -->
+
+    <form method="post">{% csrf_token %}
+        <fieldset class="p-2">
+        <legend>Your Listings:</legend>
+        {% for listing in listings %}
+            <p><div class="row p-2 border">
+
+                <div class="col-2">
+                    {% if not listing.image %}
+                        <img class='img-fluid' src="{% static 'auctions/default.jpg' %}" alt="{{ listing.title }}">
+                    {% else %}
+                        <img class='img-fluid' src="{{ listing.image }}" alt="{{ listing.title }}">
+                    {% endif %}
+                </div>
+                <div class="col">
+                    <a href="{% url 'listing' pk=listing.id %}">
+                    <h5>{{ listing.title }}</h5></a>
+                    <p>{{ listing.description|truncatewords:20 }}</p>
+                </div>
+                <div class="col-2">
+                    <small>Current price:</small>
+                    <h3> {{ listing.bids.first.bid|default:listing.starting_bid }} €</h3>
+                    {% if not listing.bids %}
+                        <span class="badge rounded-pill bg-secondary">No Bids</span>
+                    {% else %}
+
+                    {% endif %}
+                </div>
+            </div></p>
+        {% endfor %}
+        </fieldset>
+    </form>
+
+
+{% endblock %}

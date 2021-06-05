@@ -3,10 +3,14 @@ from django.db import models
 from django.utils import timezone
 
 class User(AbstractUser):
-    time_joined = timezone.now()
     def __str__(self):
         return '{}. {}'.format(self.pk, self.username)
 
+    def bids(self):
+        return self.bid_set.all()
+
+    def listings(self):
+        return self.listing_set.all()
 
 class Listing(models.Model):
     # setting up list of categories
