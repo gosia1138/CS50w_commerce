@@ -2,14 +2,15 @@
 
 <nav class="navbar navbar-light">
     <a href="{% url 'index' %}" class="navbar-brand"><h3>Auctions</h3></a>
-    <form class="form-inline w-50 form-control-sm" action="#" method="get">
+    <form class="form-inline w-75 form-control-sm" action="{% url 'search' %}" method="get">
         <div class="input-group align-self-center">
-            <input class="form-control form-control-sm w-50" type="search" placeholder="Search" aria-label="Search">
-            <select class="form-select form-select-sm" aria-label=".form-select-sm example">
+            <input class="form-control form-control-sm w-50" type="search" name='query'
+                placeholder="What are you looking for?" aria-label="Search">
+            <select class="form-select form-select-sm" aria-label=".form-select-sm example" name='category'>
                 <option selected>Category</option>
-                <option value="1">One</option>
-                <option value="2">Two</option>
-                <option value="3">Three</option>
+                {% for category in categories %}
+                    <option value="1">{{ category }}</option>
+                {% endfor %}
             </select>
             <button class="btn btn-outline-secondary my-2 my-sm-0" type="submit">Search</button>
         </div>

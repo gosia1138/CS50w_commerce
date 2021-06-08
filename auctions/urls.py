@@ -13,5 +13,6 @@ urlpatterns = [
     path('watchlist/', views.watchlist_view, name='watchlist'),
     path('bids/', views.users_bids_view, name='users_bids'),
     path('listings/', views.users_listings_view, name='users_listings'),
+    path('search/', views.search_view, name='search')
 ]
 urlpatterns += staticfiles_urlpatterns()

@@ -2,6 +2,9 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
 
+categories_list = ['Electronics', 'Fashion', 'House & Garden', 'Beauty', 'Health',
+    'Culture & Entertainment', 'Sport & Outdors', 'Moto', 'Art & Collectibles']
+
 class User(AbstractUser):
     def __str__(self):
         return '{}. {}'.format(self.pk, self.username)
@@ -12,20 +15,26 @@ class User(AbstractUser):
     def listings(self):
         return self.listing_set.all()
 
+
 class Listing(models.Model):
     # setting up list of categories
-    categories = ['Electronics', 'Fashion', 'House & Garden', 'Beauty', 'Health',
-        'Culture & Entertainment', 'Sport & Outdors', 'Moto', 'Art & Collectibles']
-    CATS = []
-    for i, category in enumerate(categories):
-        CATS.append((i, category))
-    CATS.append((99, 'Others'))
+    class Categories(models.IntegerChoices):
+        ELECTRONICS = 1, 'Electronics'
+        FASHION = 2, 'Fashion'
+        HOUSE = 3, 'House & Garden'
+        BEAUTY = 4, 'Beauty'
+        HEALTH = 5, 'Health'
+        CULTURE = 6, 'Culture & Entertainment'
+        SPORT = 7, 'Sport & Outdors'
+        MOTO = 8, 'Moto'
+        ART = 9, 'Art & Collectibles'
+        OTHER = 99, ('Other')
+
     # fields
-    category = models.IntegerField(choices=CATS, default=99)
     title = models.CharField(max_length=120)
     image = models.URLField(blank=True)
     description = models.TextField()
-    category = models.IntegerField(choices=CATS)
+    category = models.IntegerField(choices=Categories.choices, blank=True)
     time = models.DateTimeField(default=timezone.now)
     time_closed = models.DateTimeField(blank=True, null=True)
     starting_bid = models.DecimalField(max_digits=30, decimal_places=2)

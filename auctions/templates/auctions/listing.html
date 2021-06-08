@@ -8,7 +8,7 @@
 
 <div class="row">
 
-<!-- IMAGE, TITLE, BID OR CLOSE AUCTION -->
+    <!-- IMAGE, TITLE, BID OR CLOSE AUCTION -->
 
     <div class="col-sm-8 p-3">
         {% if not listing.image %}
@@ -94,7 +94,7 @@
 
     <div class="row gap-3">
         <div class="col-sm p-3">
-            <p>{{ listing.description }}</p>
+            <p>{{ description|safe }}</p>
         </div>
     </div>
 

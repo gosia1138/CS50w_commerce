@@ -4,6 +4,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from markdown2 import markdown
 
 from .forms import ListingForm, CommentForm
 from .models import User, Listing, Bid, Comment
@@ -75,18 +76,19 @@ def create_view(request):
         form = ListingForm(request.POST)
         if form.is_valid():
             l = Listing(
-                title = form.cleaned_data['title'],
-                category = form.cleaned_data['category'],
-                image = form.cleaned_data['image'],
-                description = form.cleaned_data['description'],
-                starting_bid = form.cleaned_data['starting_bid'],
-                user = request.user,
+                title=form.cleaned_data['title'],
+                category=form.cleaned_data['category'],
+                image=form.cleaned_data['image'],
+                description=form.cleaned_data['description'],
+                starting_bid=form.cleaned_data['starting_bid'],
+                user=request.user,
             )
             l.save()
             return HttpResponseRedirect(reverse('listing', args=[l.pk]))
     else:
         form = ListingForm()
-        return render(request, 'auctions/new.html', {'form':form})
+        return render(request, 'auctions/new.html', {'form': form})
+
 
 def detail_view(request, pk):
     listing = Listing.objects.get(pk=pk)
@@ -134,6 +136,7 @@ def detail_view(request, pk):
             else:
                 return render(request, 'auctions/listing.html', {
                         'listing':listing,
+                        'description': markdown(listing.description),
                         'watchers': len(listing.watchers.all()),
                         'bidders': set(bid.user for bid in Listing.bids(listing)),
                         'bids': Listing.bids(listing),
@@ -149,6 +152,7 @@ def detail_view(request, pk):
         # Displaying the site (GET REQUEST)
         return render(request, 'auctions/listing.html', {
                 'listing':listing,
+                'description': markdown(listing.description),
                 'watchers': len(listing.watchers.all()),
                 'bidders': set(bid.user for bid in Listing.bids(listing)),
                 'bidders_number': len(set(bid.user for bid in Listing.bids(listing))),
@@ -186,3 +190,21 @@ def users_listings_view(request):
         'listings': listings
     }
     return render(request, 'auctions/users_listings.html', context)
+
+
+def search_view(request):
+    if 'query' in request.GET:
+        q = request.GET.get('query')
+        cat = request.GET.get('category').lower()
+        search_results = [entry for entry in Listing.objects.all() if q in entry.title.lower()]
+        if cat != 'category':
+            search_results = [entry for entry in search_results if entry.category == cat]
+
+        return render(request, 'auctions/search.html', {
+            'q': q,
+            'search_results': search_results,
+        })
+    else:
+        return render(request, 'auctions/search.html', {
+            'message': 'Type your query in the search field above.'
+        })
