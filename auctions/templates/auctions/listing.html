@@ -1,6 +1,7 @@
 {% extends 'auctions/layout.html' %}
 {% load static %}
 {% load crispy_forms_tags %}
+{% load markdown_tags %}
 
 {% block body %}
 
@@ -94,7 +95,7 @@
 
     <div class="row gap-3">
         <div class="col-sm p-3">
-            <p>{{ description|safe }}</p>
+            <p>{{ description|markdown_on|safe }}</p>
         </div>
     </div>
 

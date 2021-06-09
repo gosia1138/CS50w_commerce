@@ -1,0 +1,26 @@
+{% load static %}
+{% load markdown_tags %}
+
+<div class="container p-2">
+    {% for listing in listings %}
+        {% if not listing.closed %}
+            <p><div class="row p-3 border bg-light">
+                <div class="col-2">
+                    {% if not listing.image %}
+                        <img class='img-fluid' src="{% static 'auctions/default.jpg' %}" alt="{{ listing.title }}">
+                    {% else %}
+                        <img class='img-fluid' src="{{ listing.image }}" alt="{{ listing.title }}">
+                    {% endif %}
+                </div>
+                <div class="col">
+                    <a href="{% url 'listing' pk=listing.id %}">
+                    <h4>{{ listing.title }}</h4></a>
+                    <p>{{ listing.description|markdown_off|truncatewords:20 }}</p>
+                </div>
+                <div class="col-2">
+                    <h5> {{ listing.bids.first.bid|default:listing.starting_bid }} €</h5>
+                </div>
+            </div></p>
+        {% endif %}
+    {% endfor %}
+</div>

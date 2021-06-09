@@ -4,7 +4,6 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from markdown2 import markdown
 
 from .forms import ListingForm, CommentForm
 from .models import User, Listing, Bid, Comment
@@ -136,7 +135,7 @@ def detail_view(request, pk):
             else:
                 return render(request, 'auctions/listing.html', {
                         'listing':listing,
-                        'description': markdown(listing.description),
+                        'description': listing.description,
                         'watchers': len(listing.watchers.all()),
                         'bidders': set(bid.user for bid in Listing.bids(listing)),
                         'bids': Listing.bids(listing),
@@ -152,7 +151,7 @@ def detail_view(request, pk):
         # Displaying the site (GET REQUEST)
         return render(request, 'auctions/listing.html', {
                 'listing':listing,
-                'description': markdown(listing.description),
+                'description': listing.description,
                 'watchers': len(listing.watchers.all()),
                 'bidders': set(bid.user for bid in Listing.bids(listing)),
                 'bidders_number': len(set(bid.user for bid in Listing.bids(listing))),
@@ -172,14 +171,17 @@ def watchlist_view(request):
                 request.user.watchlist.remove(listing)
         return HttpResponseRedirect(reverse('watchlist'))
     else:
-        return render(request, 'auctions/watchlist.html')
+        context = {
+            'listings': request.user.watchlist.all()
+        }
+        return render(request, 'auctions/watchlist.html', context)
 
 
 def users_bids_view(request):
     bids = request.user.bids()
     bids_l = set(bid.listing for bid in bids)
     context = {
-        'bids': bids_l
+        'listings': bids_l
     }
     return render(request, 'auctions/users_bids.html', context)
 
@@ -202,7 +204,7 @@ def search_view(request):
 
         return render(request, 'auctions/search.html', {
             'q': q,
-            'search_results': search_results,
+            'listings': search_results,
         })
     else:
         return render(request, 'auctions/search.html', {

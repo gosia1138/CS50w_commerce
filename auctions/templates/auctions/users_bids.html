@@ -27,32 +27,7 @@
     <form method="post">{% csrf_token %}
         <fieldset class="p-2">
         <legend>Your bids:</legend>
-        {% for listing in bids %}
-            <p><div class="row p-2 border">
-
-                <div class="col-2">
-                    {% if not listing.image %}
-                        <img class='img-fluid' src="{% static 'auctions/default.jpg' %}" alt="{{ listing.title }}">
-                    {% else %}
-                        <img class='img-fluid' src="{{ listing.image }}" alt="{{ listing.title }}">
-                    {% endif %}
-                </div>
-                <div class="col">
-                    <a href="{% url 'listing' pk=listing.id %}">
-                    <h5>{{ listing.title }}</h5></a>
-                    <p>{{ listing.description|truncatewords:20 }}</p>
-                </div>
-                <div class="col-2">
-                    <small>Current price:</small>
-                    <h3> {{ listing.bids.first.bid|default:listing.starting_bid }} €</h3>
-                    {% if listing.bids.first.user == request.user %}
-                        <span class="badge rounded-pill bg-success">Winning!</span>
-                    {% else %}
-                        <span class="badge rounded-pill bg-warning">Outbid!</span>
-                    {% endif %}
-                </div>
-            </div></p>
-        {% endfor %}
+            {% include 'auctions/listings.html' %}
         </fieldset>
     </form>
 
