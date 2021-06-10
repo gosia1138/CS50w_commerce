@@ -6,33 +6,39 @@
 
     <!-- DASHBOARD MENU -->
 
-    <h3>Dashboard</h3>
-    <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <a class="nav-link active" href="{% url 'watchlist' %}">Watchlist</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'users_bids' %}">Bids</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'new_listing' %}">New Listing</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'users_listings' %}">Your Listings</a>
-        </li>
-    </ul>
-    <br>
+    {% include 'auctions/dashboard_nav.html' %}
 
     <!-- CONTENT -->
 
     <form method="post">{% csrf_token %}
-        <fieldset class="p-2">
-        <legend>Your watchlist:</legend>
-            {% include 'auctions/listings.html' %}
-        </fieldset>
-        <br>
-        <input type="submit" class="btn btn-primary" value="Stop watching selected listings">
-    </form>
+       <fieldset class="p-2">
+       <legend>Your watchlist:</legend>
+       {% for listing in request.user.watchlist.all %}
+           <p><div class="row p-2 border">
+               <div class="col-1">
+                   <input class="form-check-input" type="checkbox" id="{{ listing.pk }}" name="{{ listing.pk }}">
+               </div>
+               <div class="col-2">
+                   {% if not listing.image %}
+                       <img class='img-fluid' src="{% static 'auctions/default.jpg' %}" alt="{{ listing.title }}">
+                   {% else %}
+                       <img class='img-fluid' src="{{ listing.image }}" alt="{{ listing.title }}">
+                   {% endif %}
+               </div>
+               <div class="col">
+                   <a href="{% url 'listing' pk=listing.id %}">
+                   <h5>{{ listing.title }}</h5></a>
+                   <p>{{ listing.description|markdown_off|truncatewords:20 }}</p>
+               </div>
+               <div class="col-2">
+                   <h3> {{ listing.bids.first.bid|default:listing.starting_bid }} €</h3>
+               </div>
+           </div></p>
+       {% endfor %}
+       </fieldset>
+       <br>
+       <input type="submit" class="btn btn-primary" value="Stop watching selected listings">
+   </form>
 
 
 {% endblock %}

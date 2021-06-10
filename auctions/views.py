@@ -1,11 +1,14 @@
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import PasswordChangeView
 from django.db import IntegrityError
+from django.forms.models import model_to_dict
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
-from django.urls import reverse
+from django.shortcuts import redirect, render
+from django.urls import reverse, reverse_lazy
 
-from .forms import ListingForm, CommentForm
+from .forms import ListingForm, CommentForm, UserUpdateForm
 from .models import User, Listing, Bid, Comment
 
 
@@ -86,24 +89,15 @@ def create_view(request):
             return HttpResponseRedirect(reverse('listing', args=[l.pk]))
     else:
         form = ListingForm()
-        return render(request, 'auctions/new.html', {'form': form})
+        return render(request, 'auctions/new.html', {
+            'form': form,
+            'create':'create',
+            })
 
 
 def detail_view(request, pk):
     listing = Listing.objects.get(pk=pk)
     if request.method == 'POST':
-        # DEBUGGING LINE:
-        # bidders = set()
-        # for bid in Listing.bids(listing):
-        #     bidders.add(bid.user)
-        # number = len(bidders)
-        # context = {
-        #     'bidders': bidders,
-        #     'number': number,
-        #     'data': request.POST,
-        # }
-        # return render(request, 'auctions/debug.html', context)
-
         if 'close' in request.POST:
             listing.closed = True
             listing.save()
@@ -162,7 +156,7 @@ def detail_view(request, pk):
                 'comment_form': CommentForm()
             })
 
-
+@login_required
 def watchlist_view(request):
     if request.method == 'POST':
         for k, v in request.POST.items():
@@ -172,27 +166,42 @@ def watchlist_view(request):
         return HttpResponseRedirect(reverse('watchlist'))
     else:
         context = {
-            'listings': request.user.watchlist.all()
+            'listings': request.user.watchlist.all(),
+            'watchlist': 'watchlist',
         }
         return render(request, 'auctions/watchlist.html', context)
 
-
+@login_required
 def users_bids_view(request):
     bids = request.user.bids()
     bids_l = set(bid.listing for bid in bids)
     context = {
-        'listings': bids_l
+        'listings': bids_l,
+        'users_bids': 'users_bids',
     }
     return render(request, 'auctions/users_bids.html', context)
 
-
+@login_required
 def users_listings_view(request):
     listings = request.user.listings()
     context = {
-        'listings': listings
+        'listings': listings,
+        'users_listings': 'users_listings',
     }
     return render(request, 'auctions/users_listings.html', context)
 
+@login_required
+def profile_view(request):
+    if request.method == 'POST':
+        form = UserUpdateForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+        return redirect('profile')
+    else:
+        return render(request, 'auctions/profile.html', {
+            'form':UserUpdateForm(initial=model_to_dict(request.user)),
+            'profile': 'profile',
+        })
 
 def search_view(request):
     if 'query' in request.GET:
@@ -210,3 +219,19 @@ def search_view(request):
         return render(request, 'auctions/search.html', {
             'message': 'Type your query in the search field above.'
         })
+
+def category_view(request, category):
+    listings = Listing.objects.filter(category=category)
+    cat_label = Listing.Categories.get_label(category)
+    return render(request, 'auctions/category.html', {
+        'listings': listings,
+        'category': cat_label,
+    })
+
+class CustomPasswordChangeView(PasswordChangeView):
+    template_name = 'auctions/change-password.html'
+    success_url = reverse_lazy('profile')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Your password has been changed.')
+        return super().form_valid(form)

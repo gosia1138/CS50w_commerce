@@ -1,0 +1,39 @@
+<h3>Dashboard</h3>
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link
+        {% if watchlist %}
+            active
+        {% endif %}
+        " href="{% url 'watchlist' %}">Watchlist</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link
+        {% if users_bids %}
+            active
+        {% endif %}
+        " href="{% url 'users_bids' %}">Bids</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link
+        {% if create %}
+            active
+        {% endif %}
+        " href="{% url 'new_listing' %}">New Listing</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link
+        {% if users_listings %}
+            active
+        {% endif %}
+        " href="{% url 'users_listings' %}">Your Listings</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link
+        {% if profile %}
+            active
+        {% endif %}
+        " href="{% url 'profile' %}">Profile</a>
+    </li>
+</ul>
+<br>

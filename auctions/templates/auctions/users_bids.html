@@ -5,22 +5,7 @@
 
     <!-- DASHBOARD MENU -->
 
-    <h3>Dashboard</h3>
-    <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link active" href="{% url 'users_bids' %}">Bids</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'new_listing' %}">New Listing</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'users_listings' %}">Your Listings</a>
-        </li>
-    </ul>
-    <br>
+    {% include 'auctions/dashboard_nav.html' %}
 
     <!-- CONTENT -->
 

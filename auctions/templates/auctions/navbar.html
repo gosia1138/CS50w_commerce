@@ -7,9 +7,9 @@
             <input class="form-control form-control-sm w-50" type="search" name='query'
                 placeholder="What are you looking for?" aria-label="Search">
             <select class="form-select form-select-sm" aria-label=".form-select-sm example" name='category'>
-                <option selected>Category</option>
+                <option selected>All Categories</option>
                 {% for category in categories %}
-                    <option value="1">{{ category }}</option>
+                    <option>{{ category.label }}</option>
                 {% endfor %}
             </select>
             <button class="btn btn-outline-secondary my-2 my-sm-0" type="submit">Search</button>

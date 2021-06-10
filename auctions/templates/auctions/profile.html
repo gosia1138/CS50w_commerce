@@ -1,0 +1,27 @@
+{% extends "auctions/layout.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block body %}
+
+    <!-- DASHBOARD MENU -->
+
+    {% include 'auctions/dashboard_nav.html' %}
+
+    <!-- CONTENT -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{message}}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">{% csrf_token %}
+        {{ form|crispy }}
+        <a href="{% url 'change_password' %}">change password</a><br>
+        <input class='btn btn-primary my-3' type="submit" value="Update"><br>
+    </form>
+
+
+{% endblock %}

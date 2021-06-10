@@ -30,6 +30,14 @@ class Listing(models.Model):
         ART = 9, 'Art & Collectibles'
         OTHER = 99, ('Other')
 
+        @classmethod
+        def get_label(cls, id):
+            for tup in cls.choices:
+                if tup[0] == id:
+                    return tup[1]
+
+
+
     # fields
     title = models.CharField(max_length=120)
     image = models.URLField(blank=True)
@@ -61,6 +69,13 @@ class Listing(models.Model):
 
     def comments(self):
         return self.comment_set.all().order_by('-time')
+
+    def n_watchers(self):
+        return len(self.watchers.all())
+
+    def n_bidders(self):
+        bidders = [bid.user for bid in self.bid_set.all()]
+        return len(set(bidders))
 
 
 class Bid(models.Model):

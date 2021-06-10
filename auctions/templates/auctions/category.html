@@ -1,12 +1,14 @@
-{% extends "auctions/layout.html" %}
+{% extends 'auctions/layout.html' %}
 {% load static %}
 
+
+{% block title %}Category: {{ category }}{% endblock %}
 
 {% block body %}
 
 <div class="dropdown m-3">
     <a class="btn btn-outline-secondary btn-lg dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-        Active listings: All
+        Active listings: {{ category }}
     </a>
 
     <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
@@ -17,9 +19,9 @@
         {% endfor %}
     </ul>
 </div>
-
-<div class="container overflow-hidden">
+<div class="container">
     {% include 'auctions/listings.html' %}
 </div>
+
 
 {% endblock %}

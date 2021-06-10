@@ -5,33 +5,24 @@
 
 <!-- DASHBOARD MENU -->
 
-<h3>Dashboard</h3>
-<ul class="nav nav-tabs">
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'watchlist' %}">Watchlist</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'users_bids' %}">Bids</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link active" href="{% url 'new_listing' %}">New Listing</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'users_listings' %}">Your Listings</a>
-    </li>
-</ul>
-<br>
+{% include 'auctions/dashboard_nav.html' %}
 
 <!-- CONTENT -->
 
 <h2>Create new listing:</h2>
+
+<div class="alert alert-primary" role="alert">
+  You can use Markdown in the description field -
+  <a target="blank" href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet">check how.</a>
+</div>
+
 {% if message %}
     <div>{{ message }}</div>
 {% endif %}
 
 <form method="post">{% csrf_token %}
     {{ form|crispy }}
-    <input type="submit" value="Submit"><br>
+    <input class='btn btn-primary my-3' type="submit" value="Submit"><br>
 </form>
 
 {% endblock %}
