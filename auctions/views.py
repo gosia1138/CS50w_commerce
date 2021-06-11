@@ -31,6 +31,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
+            messages.success(request, 'You are now logged in.')
             return HttpResponseRedirect(reverse("index"))
         else:
             return render(request, "auctions/login.html", {
@@ -42,6 +43,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
+    messages.success(request, 'You have been logged out.')
     return HttpResponseRedirect(reverse("index"))
 
 
@@ -67,6 +69,7 @@ def register(request):
                 "message": "Username already taken."
             })
         login(request, user)
+        messages.success(request, 'Your account has been created successfully.')
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")

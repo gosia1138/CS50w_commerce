@@ -9,13 +9,6 @@
     {% include 'auctions/dashboard_nav.html' %}
 
     <!-- CONTENT -->
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}" role="alert">
-                {{message}}
-            </div>
-        {% endfor %}
-    {% endif %}
 
     <form method="post">{% csrf_token %}
         {{ form|crispy }}

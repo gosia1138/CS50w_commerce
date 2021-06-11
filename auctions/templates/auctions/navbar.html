@@ -1,5 +1,7 @@
 {% load static %}
 
+<!-- SEARCH BAR AND LOGO -->
+
 <nav class="navbar navbar-light">
     <a href="{% url 'index' %}" class="navbar-brand"><h3>Auctions</h3></a>
     <form class="form-inline w-75 form-control-sm" action="{% url 'search' %}" method="get">
@@ -16,9 +18,10 @@
         </div>
   </form>
   <div class="">
+
+<!-- DASHBOARD ACCESS DROPDOWN -->
+
       {% if user.is_authenticated %}
-
-
           <div class="btn-group p-0">
               <a role="button" class="btn btn-outline-secondary" href="{% url 'watchlist' %}">
                   Welcome, <strong>{{ user.username }}!</strong></a>
@@ -29,11 +32,28 @@
                   <li class="nav-item">
                       <a class="nav-link" href="{% url 'watchlist' %}">Dashboard</a>
                   </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'users_bids' %}">Your Bids</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'new_listing' %}">New Listing</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'users_listings' %}">Your Listing</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'profile' %}">Profile</a>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
                   <li class="nav-item">
                       <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
                   </li>
               </ul>
           </div>
+
+<!-- LOGIN REGISTER -->
+
       {% else %}
           <ul class="nav">
               <li class="nav-item">
