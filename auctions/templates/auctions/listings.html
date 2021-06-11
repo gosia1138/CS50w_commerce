@@ -16,7 +16,14 @@
                     <a href="{% url 'listing' pk=listing.id %}">
                     <h5>{{ listing.title }}</h5></a>
                     <p>{{ listing.description|markdown_off|truncatewords:20 }}</p>
-                    <h4> {{ listing.bids.first.bid|default:listing.starting_bid }} €</h4>
+                    <h4> {{ listing.bids.first.bid|default:listing.starting_bid }} €
+                        {% if user in listing.bidders %}
+                            {% if user == listing.bids.first.user %}
+                                <span class="badge rounded-pill bg-success">Winning!</span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-warning text-dark">Outbid!</span>
+                            {% endif %}
+                        {% endif %}</h4>
                     <small style="color:charcoal;">bidders: {{ listing.n_bidders }} |</small>
                     <small>watchers:{{ listing.n_watchers }}</small>
                 </div>

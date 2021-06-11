@@ -56,6 +56,9 @@ class Listing(models.Model):
     def bids(self):
         return self.bid_set.all().order_by('-bid')
 
+    def bidders(self):
+        return [bid.user for bid in self.bid_set.all()]
+
     def next_bid(self):
         if not self.bids():
             return float(self.starting_bid)
@@ -93,3 +96,11 @@ class Comment(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE)
     time = models.DateTimeField(default=timezone.now)
     comment_content = models.TextField(verbose_name='Comment:')
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    image = models.ImageField(default='default_user.jpg', upload_to='profile_pics')
+
+    def __str__(self):
+        return '{} Profile'.format(self.user.username)

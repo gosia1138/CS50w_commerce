@@ -9,11 +9,27 @@
     {% include 'auctions/dashboard_nav.html' %}
 
     <!-- CONTENT -->
-
-    <form method="post">{% csrf_token %}
-        {{ form|crispy }}
-        <a href="{% url 'change_password' %}">change password</a><br>
-        <input class='btn btn-primary my-3' type="submit" value="Update"><br>
+    <form method="post" enctype='multipart/form-data'>{% csrf_token %}
+    <div class="container p-4">
+        <div class="row py-2">
+            <div class="col-3">
+                <img class='img-fluid rounded' src="{{ user.profile.image.url}}">
+            </div>
+            <div class="col-8">
+                <h2>Hello, {{ user.username }}!</h2>
+                <small style="color:gray;">joined: {{ user.date_joined|date:"j M Y" }}</small>
+            </div>
+        </div>
+        <hr>
+        <div class="row py-2">
+            <div class="col">
+                {{ form|crispy }}<br>
+                {{ p_form|crispy }}<br>
+                <a href="{% url 'change_password' %}">change password</a><br>
+                <input class='btn btn-primary my-3' type="submit" value="Update"><br>
+            </div>
+        </div>
+    </div>
     </form>
 
 

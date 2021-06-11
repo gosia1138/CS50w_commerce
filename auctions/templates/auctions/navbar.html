@@ -4,7 +4,7 @@
 
 <nav class="navbar navbar-light">
     <a href="{% url 'index' %}" class="navbar-brand"><h3>Auctions</h3></a>
-    <form class="form-inline w-75 form-control-sm" action="{% url 'search' %}" method="get">
+    <form class="form-inline w-50 form-control-sm" action="{% url 'search' %}" method="get">
         <div class="input-group align-self-center">
             <input class="form-control form-control-sm w-50" type="search" name='query'
                 placeholder="What are you looking for?" aria-label="Search">

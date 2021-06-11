@@ -8,7 +8,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 
-from .forms import ListingForm, CommentForm, UserUpdateForm
+from .forms import ListingForm, CommentForm, UserUpdateForm, ProfileUpdateForm
 from .models import User, Listing, Bid, Comment
 
 
@@ -197,13 +197,18 @@ def users_listings_view(request):
 def profile_view(request):
     if request.method == 'POST':
         form = UserUpdateForm(request.POST, instance=request.user)
-        if form.is_valid():
+        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        if form.is_valid() and p_form.is_valid():
             form.save()
+            p_form.save()
+        messages.success(request, 'Your profile has benn updated.')
         return redirect('profile')
     else:
         return render(request, 'auctions/profile.html', {
-            'form':UserUpdateForm(initial=model_to_dict(request.user)),
+            'form': UserUpdateForm(instance=request.user),
+            'p_form': ProfileUpdateForm(instance=request.user.profile),
             'profile': 'profile',
+            'user': request.user,
         })
 
 def search_view(request):
