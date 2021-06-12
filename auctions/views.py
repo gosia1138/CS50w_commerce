@@ -169,17 +169,24 @@ def watchlist_view(request):
         return HttpResponseRedirect(reverse('watchlist'))
     else:
         context = {
-            'listings': request.user.watchlist.all(),
+            'listings': request.user.watchlist.all().filter(closed=False).order_by('-time'),
             'watchlist': 'watchlist',
         }
         return render(request, 'auctions/watchlist.html', context)
 
 @login_required
 def users_bids_view(request):
-    bids = request.user.bids()
-    bids_l = set(bid.listing for bid in bids)
+    bids_l = set(bid.listing for bid in request.user.bids())
+    l_active = []
+    l_closed = []
+    for listing in bids_l:
+        if listing.closed == False:
+            l_active.append(listing)
+        else:
+            l_closed.append(listing)
     context = {
-        'listings': bids_l,
+        'listings': l_active,
+        'listings_closed': l_closed,
         'users_bids': 'users_bids',
     }
     return render(request, 'auctions/users_bids.html', context)
