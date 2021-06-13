@@ -11,7 +11,7 @@
             <select class="form-select form-select-sm" aria-label=".form-select-sm example" name='category'>
                 <option selected>All Categories</option>
                 {% for category in categories %}
-                    <option>{{ category.label }}</option>
+                    <option name="{{category}}" value="{{category.label}}">{{ category.label }}</option>
                 {% endfor %}
             </select>
             <button class="btn btn-outline-secondary my-2 my-sm-0" type="submit">Search</button>

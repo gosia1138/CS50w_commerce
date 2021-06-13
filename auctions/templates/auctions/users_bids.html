@@ -2,6 +2,8 @@
 {% load static %}
 {% load markdown_tags %}
 
+{% block title %}{{user.username}} - Bids{% endblock %}
+
 {% block body %}
 
     <!-- DASHBOARD MENU -->
@@ -13,74 +15,71 @@
     {% if listings|length > 0 %}
         <h3>Currents auctions:</h3>
     {% endif %}
-    
+
     <div class="container">
         {% for listing in listings %}
-            {% if not listing.closed %}
-                <p><div class="row">
-                    <div class="col-3 overflow-hidden">
-                        {% if not listing.image %}
-                            <img class='img-fluid' src="{% static 'auctions/default.jpg' %}" alt="{{ listing.title }}">
-                        {% else %}
-                            <img class='img-fluid' src="{{ listing.image }}" alt="{{ listing.title }}">
-                        {% endif %}
-                    </div>
-                    <div class="col">
-                        <a href="{% url 'listing' pk=listing.id %}">
-                        <h5>{{ listing.title }}</h5></a>
-                        <p>{{ listing.description|markdown_off|truncatewords:20 }}</p>
-                        <h4> {{ listing.bids.first.bid|default:listing.starting_bid }} €
-                            {% if user in listing.bidders %}
-                                {% if user == listing.bids.first.user %}
-                                    <span class="badge rounded-pill bg-success">Winning!</span>
-                                {% else %}
-                                    <span class="badge rounded-pill bg-warning text-dark">Outbid!</span>
-                                {% endif %}
-                            {% endif %}</h4>
-                        <small style="color:charcoal;">bidders: {{ listing.n_bidders }} |</small>
-                        <small>watchers:{{ listing.n_watchers }}</small>
-                    </div>
-                </div></p>
-            {% endif %}
+            <p><div class="row">
+                <div class="col-3 overflow-hidden">
+                    {% if not listing.image %}
+                        <img class='img-fluid' src="{% static 'auctions/default.jpg' %}" alt="{{ listing.title }}">
+                    {% else %}
+                        <img class='img-fluid' src="{{ listing.image }}" alt="{{ listing.title }}">
+                    {% endif %}
+                </div>
+                <div class="col">
+                    <a href="{% url 'listing' pk=listing.id %}">
+                    <h5>{{ listing.title }}</h5></a>
+                    <p>{{ listing.description|markdown_off|truncatewords:20 }}</p>
+                    <h4> {{ listing.bids.first.bid|default:listing.starting_bid }} €
+                        {% if user in listing.bidders %}
+                            {% if user == listing.bids.first.user %}
+                                <span class="badge rounded-pill bg-success">Winning!</span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-warning text-dark">Outbid!</span>
+                            {% endif %}
+                        {% endif %}</h4>
+                    <small style="color:charcoal;">bidders: {{ listing.n_bidders }} |</small>
+                    <small>watchers:{{ listing.n_watchers }}</small>
+                </div>
+            </div></p>
         {% endfor %}
     </div>
     <hr>
 
     <!-- ACTIVE AUCTIONS -->
 
-        {% if listings_closed|length > 0 %}
-            <h3>Closed auctions:</h3>
-        {% endif %}
+    {% if listings_closed|length > 0 %}
+        <h3>Closed auctions:</h3>
+    {% endif %}
+
     <div class="container">
         {% for listing in listings_closed %}
-
-                <p><div class="row">
-                    <div class="col-3 overflow-hidden">
-                        {% if not listing.image %}
-                            <img class='img-fluid' src="{% static 'auctions/default.jpg' %}" alt="{{ listing.title }}">
-                        {% else %}
-                            <img class='img-fluid' src="{{ listing.image }}" alt="{{ listing.title }}">
-                        {% endif %}
-                    </div>
-                    <div class="col">
-                        <a href="{% url 'listing' pk=listing.id %}">
-                        <h5>{{ listing.title }}</h5></a>
-                        <p>{{ listing.description|markdown_off|truncatewords:20 }}</p>
-                        <h4> {{ listing.bids.first.bid|default:listing.starting_bid }} €
-                            {% if user in listing.bidders %}
-                                {% if user == listing.bids.first.user %}
-                                    <span class="badge rounded-pill bg-secondary">Closed</span>
-                                    <span class="badge rounded-pill bg-success">Won!</span>
-                                {% else %}
-                                    <span class="badge rounded-pill bg-secondary">Closed</span>
-                                    <span class="badge rounded-pill bg-warning text-dark">Outbid!</span>
-                                {% endif %}
-                            {% endif %}</h4>
-                        <small style="color:charcoal;">bidders: {{ listing.n_bidders }} |</small>
-                        <small>watchers:{{ listing.n_watchers }}</small>
-                    </div>
-                </div></p>
-
+            <p><div class="row">
+                <div class="col-3 overflow-hidden">
+                    {% if not listing.image %}
+                        <img class='img-fluid' src="{% static 'auctions/default.jpg' %}" alt="{{ listing.title }}">
+                    {% else %}
+                        <img class='img-fluid' src="{{ listing.image }}" alt="{{ listing.title }}">
+                    {% endif %}
+                </div>
+                <div class="col">
+                    <a href="{% url 'listing' pk=listing.id %}">
+                    <h5>{{ listing.title }}</h5></a>
+                    <p>{{ listing.description|markdown_off|truncatewords:20 }}</p>
+                    <h4> {{ listing.bids.first.bid|default:listing.starting_bid }} €
+                        {% if user in listing.bidders %}
+                            {% if user == listing.bids.first.user %}
+                                <span class="badge rounded-pill bg-secondary">Closed</span>
+                                <span class="badge rounded-pill bg-success">Won!</span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-secondary">Closed</span>
+                                <span class="badge rounded-pill bg-warning text-dark">Outbid!</span>
+                            {% endif %}
+                        {% endif %}</h4>
+                    <small style="color:charcoal;">bidders: {{ listing.n_bidders }} |</small>
+                    <small>watchers:{{ listing.n_watchers }}</small>
+                </div>
+            </div></p>
         {% endfor %}
     </div>
 

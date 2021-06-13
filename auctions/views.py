@@ -3,8 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordChangeView
 from django.db import IntegrityError
-from django.forms.models import model_to_dict
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 
@@ -129,12 +128,14 @@ def detail_view(request, pk):
             if bid >= listing.next_bid():
                 b = Bid(user=request.user, listing=listing, bid=bid)
                 b.save()
+                return HttpResponseRedirect(reverse('listing', args=[pk]))
             else:
                 return render(request, 'auctions/listing.html', {
                         'listing':listing,
                         'description': listing.description,
                         'watchers': len(listing.watchers.all()),
                         'bidders': set(bid.user for bid in Listing.bids(listing)),
+                        'bidders_number': len(set(bid.user for bid in Listing.bids(listing))),
                         'bids': Listing.bids(listing),
                         'next_bid': Listing.next_bid(listing),
                         'highest_bid': listing.bids().first(),
@@ -142,8 +143,6 @@ def detail_view(request, pk):
                         'comment_form': CommentForm(),
                         'bid_message': 'Miminum bid is {} €'.format(Listing.next_bid(listing))
                     })
-
-        return HttpResponseRedirect(reverse('listing', args=[pk]))
     else:
         # Displaying the site (GET REQUEST)
         return render(request, 'auctions/listing.html', {
@@ -193,9 +192,11 @@ def users_bids_view(request):
 
 @login_required
 def users_listings_view(request):
-    listings = request.user.listings()
+    listings = request.user.listings().filter(closed=False).order_by('-time')
+    listings_closed = request.user.listings().filter(closed=True).order_by('-time')
     context = {
         'listings': listings,
+        'listings_closed': listings_closed,
         'users_listings': 'users_listings',
     }
     return render(request, 'auctions/users_listings.html', context)
@@ -220,10 +221,11 @@ def profile_view(request):
 
 def search_view(request):
     if 'query' in request.GET:
-        q = request.GET.get('query')
-        cat = request.GET.get('category').lower()
+        q = request.GET.get('query').lower()
+        cat = request.GET.get('category')
         search_results = [entry for entry in Listing.objects.all() if q in entry.title.lower()]
-        if cat != 'category':
+        if cat != 'All Categories':
+            cat = [category.value for category in Listing.Categories if category.label == request.GET.get('category')][0]
             search_results = [entry for entry in search_results if entry.category == cat]
 
         return render(request, 'auctions/search.html', {
