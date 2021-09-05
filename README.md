@@ -1,6 +1,6 @@
 ## CS50w_commerce
 Design an eBay-like e-commerce auction site that will allow users to post auction listings, place bids on listings, comment on those listings, and add listings to a “watchlist.”
-[Presentation video on YouTube](https://youtu.be/WB2xSi8l8fI)
+**[Presentation video on YouTube](https://youtu.be/WB2xSi8l8fI)**
 
 ### Specification
 Complete the implementation of your auction site. You must fulfill the following requirements:
